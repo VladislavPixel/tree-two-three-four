@@ -5,6 +5,7 @@ class NodeMultipathTree {
 		this.arrChildren = new Array(maxAmountDataForNode + 1);
 		this.parent = null;
 		this.length = 0;
+		this.connections = 0;
 	};
 
 	isEmpty() {
@@ -28,6 +29,10 @@ class NodeMultipathTree {
 	};
 
 	addData(newValue) {
+		if (this.isFull()) {
+			throw new Error('Node multipath tree is full... Operation addData() is not supported...');
+		}
+
 		let m = this.length;
 
 		for (; m > 0; m--) {
@@ -47,6 +52,20 @@ class NodeMultipathTree {
 		return m;
 	};
 
+	removeLastData() {
+		if (this.isEmpty()) {
+			throw new Error('Node multipath tree is empty... Operation removeLastData() is not supported...');
+		}
+
+		this.length = this.length - 1;
+
+		const deleteValue = this.arrData[this.length];
+
+		this.arrData[this.length] = undefined;
+
+		return deleteValue;
+	};
+
 	isComplete() {
 		return this.isFull();
 	};
@@ -55,10 +74,42 @@ class NodeMultipathTree {
 		return (this.arrChildren[0] === undefined) || (this.arrChildren[0] === null);
 	};
 
+	getFirstElement() {
+		return this.arrData[0];
+	};
+
+	connectChild(node) {
+		if (this.connections === this.arrChildren.length) {
+			throw new Error('The multipath node of the tree has reached the limit of child connections... Operation connectChild() is not supported...');
+		}
+
+		const firstValue = node.getFirstElement();
+
+		let v = this.connections;
+
+		for (; v > 0; v--) {
+			const currentChild = this.arrChildren[v - 1];
+
+			if (firstValue >= currentChild.getFirstElement()) {
+				break;
+			}
+
+			this.arrChildren[v] = this.arrChildren[v - 1];
+		}
+
+		this.arrChildren[v] = node;
+
+		this.connections = this.connections + 1;
+	};
+
+	disconnectChild() {
+
+	};
+
 	split() {
 		const rightBrother = new NodeMultipathTree(this.arrData.length);
-		const saveMidValue = this.arrData[1];
-		const saveRightValue = this.arrData[2];
+		const saveRightValue = this.removeLastData();
+		const saveMidValue = this.removeLastData();
 
 		let parent = this.parent;
 
@@ -67,9 +118,20 @@ class NodeMultipathTree {
 			const newParent = new NodeMultipathTree(this.arrData.length);
 
 			parent = newParent;
+
+			this.parent = parent;
 		}
 
-		
+		// Данные, которые были на середине, идут в родителя
+		parent.addData(saveMidValue);
+
+		// Данные, которые были справа, идут в нового правого брата
+		rightBrother.addData(saveRightValue);
+
+		// Разбиваемый узел у нас законнекчен на родителя, но это же требуется сделать и для нового правого брата
+		parent.connectChild(rightBrother);
+
+		// Остается с потомками решить вопрос и поднять указатель цикла на родителя вверх
 	};
 };
 
