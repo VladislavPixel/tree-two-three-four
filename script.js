@@ -42,10 +42,10 @@ class NodeMultipathTree {
 				break;
 			}
 
-			this.addData[m] = this.arrData[m - 1];
+			this.arrData[m] = this.arrData[m - 1];
 		}
 
-		this.addData[m] = newValue;
+		this.arrData[m] = newValue;
 
 		this.length = this.length + 1;
 
@@ -102,8 +102,18 @@ class NodeMultipathTree {
 		this.connections = this.connections + 1;
 	};
 
-	disconnectChild() {
+	disconnectLastChild() {
+		if (this.connections === 0) {
+			throw new Error('The multipath node has no connections. Operation disconnectLastChild() is not supported...');
+		}
 
+		this.connections = this.connections - 1;
+
+		const disconnectNode = this.arrChildren[this.connections];
+
+		this.arrChildren[this.connections] = undefined;
+
+		return disconnectNode;
 	};
 
 	split() {
@@ -128,10 +138,35 @@ class NodeMultipathTree {
 		// Данные, которые были справа, идут в нового правого брата
 		rightBrother.addData(saveRightValue);
 
+		// Если разбиваемый узел не является листком, то отделяю от него двух правых потомков и вешаю их на новый правый узел
+		if (!this.isLeaf()) {
+			const child2 = this.disconnectLastChild();
+			const child1 = this.disconnectLastChild();
+
+			rightBrother.connectChild(child1);
+			rightBrother.connectChild(child2);
+		}
+
 		// Разбиваемый узел у нас законнекчен на родителя, но это же требуется сделать и для нового правого брата
 		parent.connectChild(rightBrother);
 
-		// Остается с потомками решить вопрос и поднять указатель цикла на родителя вверх
+		return parent;
+	};
+
+	nextChild(value) {
+		let i = 0;
+
+		for (; i < this.length; i++) {
+			const currentVal = this.arrData[i];
+
+			if (value > currentVal) {
+				continue;
+			}
+
+			break;
+		}
+
+		return this.arrChildren[i];
 	};
 };
 
@@ -161,12 +196,31 @@ class TreeTwoThreeFour {
 
 		while(true) {
 			// Если узел полон, то его требуется разбить перед тем, как что-то делать дальше
+			console.log(current);
 			if (current.isComplete()) {
 				current = current.split();
 
 			} else {
+				// Если мы в листочке, то требуется вставить данные
+				if (current.isLeaf()) {
+					current.addData(newValue);
 
+					return true;
+				}
+
+				current = current.nextChild(newValue);
 			}
 		}
 	};
 };
+
+
+const tree = new TreeTwoThreeFour();
+
+tree.insert(30);
+tree.insert(20);
+tree.insert(10);
+
+tree.insert(40);
+
+console.log(tree.root, '!!!');
