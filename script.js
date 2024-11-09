@@ -1,3 +1,5 @@
+// Для корректной работы в качестве данных не нужно использовать дубликаты, этот случай не обрабатывается алгоритмами дерева и узла
+
 // Класс узла для многопутевых деревьев
 class NodeMultipathTree {
 	constructor(maxAmountDataForNode) {
@@ -99,6 +101,8 @@ class NodeMultipathTree {
 
 		this.arrChildren[v] = node;
 
+		node.parent = this;
+
 		this.connections = this.connections + 1;
 	};
 
@@ -110,6 +114,8 @@ class NodeMultipathTree {
 		this.connections = this.connections - 1;
 
 		const disconnectNode = this.arrChildren[this.connections];
+
+		disconnectNode.parent = null;
 
 		this.arrChildren[this.connections] = undefined;
 
@@ -124,12 +130,14 @@ class NodeMultipathTree {
 		let parent = this.parent;
 
 		// Если ссылки на родительский узел нет, то мы пытаемся разбить корень дерева - это частный случай
-		if (parent === null) {
+		if (parent === null || parent === undefined) {
 			const newParent = new NodeMultipathTree(this.arrData.length);
 
 			parent = newParent;
 
 			this.parent = parent;
+
+			parent.connectChild(this);
 		}
 
 		// Данные, которые были на середине, идут в родителя
@@ -170,6 +178,7 @@ class NodeMultipathTree {
 	};
 };
 
+// Класс дерева 2-3-4
 class TreeTwoThreeFour {
 	constructor() {
 		this.root = null;
@@ -196,20 +205,24 @@ class TreeTwoThreeFour {
 
 		while(true) {
 			// Если узел полон, то его требуется разбить перед тем, как что-то делать дальше
-			console.log(current);
 			if (current.isComplete()) {
 				current = current.split();
 
-			} else {
-				// Если мы в листочке, то требуется вставить данные
-				if (current.isLeaf()) {
-					current.addData(newValue);
-
-					return true;
+				// Если после разбития ущла у нас появился новый родитель всего древа, требуется его сделать root
+				if (current.parent === null && this.root !== current) {
+					this.root = current;
 				}
-
-				current = current.nextChild(newValue);
 			}
+
+			// Если мы в листочке, то требуется вставить данные
+			if (current.isLeaf()) {
+				current.addData(newValue);
+
+				return true;
+			}
+
+			// Если мы не в листочке, то ищем место вставки
+			current = current.nextChild(newValue);
 		}
 	};
 };
@@ -220,7 +233,30 @@ const tree = new TreeTwoThreeFour();
 tree.insert(30);
 tree.insert(20);
 tree.insert(10);
-
 tree.insert(40);
+tree.insert(50);
+tree.insert(60);
+tree.insert(70);
+tree.insert(80);
+tree.insert(90);
+tree.insert(100);
+tree.insert(150);
+tree.insert(33);
+tree.insert(35);
+tree.insert(220);
+tree.insert(37);
+tree.insert(350);
+tree.insert(38);
+tree.insert(34);
+tree.insert(1);
+tree.insert(8);
+tree.insert(55);
+tree.insert(57);
+tree.insert(61);
+tree.insert(63);
+tree.insert(75);
+tree.insert(73);
+tree.insert(77);
+tree.insert(45);
 
 console.log(tree.root, '!!!');
