@@ -18,6 +18,10 @@ class NodeMultipathTree {
 		return this.length === this.arrData.length;
 	};
 
+	getChildByIndex(i) {
+		return this.arrChildren[i];
+	};
+
 	display() {
 		let value = '/ ';
 
@@ -226,6 +230,48 @@ class TreeTwoThreeFour {
 		}
 	};
 
+	find(searchValue) {
+		if (this.isEmpty()) {
+			console.log(`TreeTwoThreeFour is empty... Operation find() didn't give any results.`);
+
+			return { node: null, index: -1 };
+		}
+
+		let current = this.root;
+
+		while(true) {
+			let x = 0;
+
+			for (; x < current.length; x++) {
+				const val = current.arrData[x];
+
+				if (val === searchValue) {
+					return { node: current, index: x };
+				}
+
+				if (val < searchValue) {
+					continue;
+				}
+
+				break;
+			}
+
+			if (current.isLeaf()) {
+				return { node: null, index: -1 };
+			}
+
+			current = current.getChildByIndex(x);
+
+			if (!current) {
+				return { node: null, index: -1 };
+			}
+		}
+	};
+
+	delete(value) {
+
+	};
+
 	display() {
 		if (this.isEmpty()) {
 			console.log('TreeTwoThreeFour is empty... There is nothing to draw.');
@@ -314,4 +360,4 @@ tree.insert(73);
 tree.insert(77);
 tree.insert(45);
 
-tree.display();
+console.log(tree.find(88));
