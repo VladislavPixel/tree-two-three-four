@@ -225,6 +225,61 @@ class TreeTwoThreeFour {
 			current = current.nextChild(newValue);
 		}
 	};
+
+	display() {
+		if (this.isEmpty()) {
+			console.log('TreeTwoThreeFour is empty... There is nothing to draw.');
+
+		} else {
+			let arrDraw = [];
+
+			function collect(node) {
+				let value = '  (';
+
+				for (let m = 0; m < node.arrData.length; m++) {
+					const val = node.arrData[m];
+
+					if (val === undefined || val === null) {
+						value = value + (m !== 0 ? ',': '') + '_';
+
+					} else {
+						value = value + (m !== 0 ? ',': '') + val;
+					}
+				}
+
+				value += ')  ';
+
+				return value;
+			};
+
+			function forwardTraversal(node, depth) {
+				const str = collect(node);
+
+				if (!arrDraw[depth]) {
+					arrDraw[depth] = str;
+
+				} else {
+					arrDraw[depth] = arrDraw[depth] + str;
+				}
+
+				if (node.isLeaf()) {
+					return;
+				}
+
+				for (let m = 0; m < node.connections; m++) {
+					const child = node.arrChildren[m];
+
+					forwardTraversal(child, depth + 1);
+				}
+			};
+
+			forwardTraversal(this.root, 0);
+
+			for (let v = 0; v < arrDraw.length; v++) {
+				console.log(`DEPTH ${v}: ${arrDraw[v]}`);
+			}
+		}
+	};
 };
 
 
@@ -259,4 +314,4 @@ tree.insert(73);
 tree.insert(77);
 tree.insert(45);
 
-console.log(tree.root, '!!!');
+tree.display();
