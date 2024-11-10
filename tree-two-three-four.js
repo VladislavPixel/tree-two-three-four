@@ -102,6 +102,24 @@ class TreeTwoThreeFour {
 		}
 	};
 
+	getMaxValue() {
+		if (this.isEmpty()) {
+			console.log('TreeTwoThreeFour is empty... Operation getMaxValue() is not supported.');
+
+			return null;
+		}
+
+		let current = this.root;
+
+		while(true) {
+			if (current.isLeaf()) {
+				return current.arrData[current.length - 1];
+			}
+
+			current = current.arrChildren[current.connections - 1];
+		}
+	};
+
 	deleteNode(value) {
 		// Удаление целого узла дерева
 	};
