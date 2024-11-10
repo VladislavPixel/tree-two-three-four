@@ -120,8 +120,9 @@ class TreeTwoThreeFour {
 		}
 	};
 
+	// Удаление целого узла дерева
 	deleteNode(value) {
-		// Удаление целого узла дерева
+		
 	};
 
 	// Удаляет значение из узла
@@ -200,6 +201,61 @@ class TreeTwoThreeFour {
 
 			for (let v = 0; v < arrDraw.length; v++) {
 				console.log(`DEPTH ${v}: ${arrDraw[v]}`);
+			}
+		}
+	};
+
+	// Центрированный (симметричный) обход дерева, все элементы выводятся в отсортированном порядке
+	centeredTraversal() {
+		if (this.isEmpty()) {
+			console.log('TreeTwoThreeFour is empty... Operation centeredTraversal() is not supported.');
+
+			return { arr: [], drawLine: '' };
+		}
+
+		const arr = [];
+
+		let drawLine = '';
+
+		let current = this.root;
+
+		const stack = [-1];
+
+		while(stack.length) {
+			if (current.isLeaf()) {
+				for (let m = 0; m < current.length; m++) {
+					arr.push(current.arrData[m]);
+
+					drawLine = drawLine + `, ${current.arrData[m]}`
+				}
+
+				stack.pop();
+
+				current = current.parent;
+
+				stack.push(10);
+
+			} else {
+				const state = stack[stack.length - 1];
+
+				switch(state) {
+					case -1:
+						stack.push(0);
+					break;
+					case 0:
+						current = current.arrChildren[state];
+
+						stack.push(-1);
+					break;
+					case 10:
+						stack.pop();
+
+						const index = stack[stack.length - 1];
+
+						arr.push(current.arrData[index]);
+
+						drawLine = drawLine + `, ${current.arrData[index]}`;
+				}
 			}
 		}
 	};
