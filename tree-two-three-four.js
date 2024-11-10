@@ -84,6 +84,24 @@ class TreeTwoThreeFour {
 		}
 	};
 
+	getMinValue() {
+		if (this.isEmpty()) {
+			console.log('TreeTwoThreeFour is empty... Operation getMinValue() is not supported.');
+
+			return null;
+		}
+
+		let current = this.root;
+
+		while(true) {
+			if (current.isLeaf()) {
+				return current.arrData[0];
+			}
+
+			current = current.arrChildren[0];
+		}
+	};
+
 	deleteNode(value) {
 		// Удаление целого узла дерева
 	};
