@@ -31,4 +31,6 @@ tree.insert(73);
 tree.insert(77);
 tree.insert(45);
 
-console.log(tree.getMaxValue());
+const someArr = [69, 7, 34, 22, 88, 99, 2, 1, 15, 199, 255, 242, 9, 5, 3, 15555, 4];
+
+console.log(tree.sort(someArr), 'some Arr');

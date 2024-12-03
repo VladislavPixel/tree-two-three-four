@@ -4,8 +4,16 @@ class TreeTwoThreeFour {
 		this.root = null;
 	};
 
+	getRoot() {
+		return this.root;
+	};
+
 	isEmpty() {
 		return this.root === null;
+	};
+
+	[Symbol.iterator]() {
+		return new IteratorCenteredTraversal(this.root);
 	};
 
 	insert(newValue) {
@@ -205,6 +213,12 @@ class TreeTwoThreeFour {
 		}
 	};
 
+	getCenteredTraversalIterator(treeStructure) {
+		const tree = treeStructure ? treeStructure : this.root;
+
+		return new IteratorCenteredTraversal(tree);
+	};
+
 	// Центрированный (симметричный) обход дерева, все элементы выводятся в отсортированном порядке
 	centeredTraversal() {
 		if (this.isEmpty()) {
@@ -219,44 +233,97 @@ class TreeTwoThreeFour {
 
 		let current = this.root;
 
-		const stack = [-1];
+		const stack = [{ state: 'go-down', val: 0 }];
 
-		while(stack.length) {
-			if (current.isLeaf()) {
-				for (let m = 0; m < current.length; m++) {
-					arr.push(current.arrData[m]);
+		while(current && stack.length) {
+			const { state, val } = stack[stack.length - 1];
 
-					drawLine = drawLine + `, ${current.arrData[m]}`
-				}
+			switch(state) {
+				case 'go-down':
+					if (current.isLeaf()) {
+						stack.push({ state: 'save-all-items-on-current-step', val: null });
 
-				stack.pop();
+					} else {
+						current = current.arrChildren[val];
 
-				current = current.parent;
+						stack.push({ state: 'go-down', val: 0 });
+					}
+				break;
+				case 'save-all-items-on-current-step':
+					for (let m = 0; m < current.length; m++) {
+						const value = current.arrData[m];
 
-				stack.push(10);
+						arr.push(value);
 
-			} else {
-				const state = stack[stack.length - 1];
+						if (drawLine === '') {
+							drawLine = drawLine + value;
 
-				switch(state) {
-					case -1:
-						stack.push(0);
-					break;
-					case 0:
-						current = current.arrChildren[state];
+						} else {
+							drawLine = drawLine + `, ${value}`;
+						}
+					}
 
-						stack.push(-1);
-					break;
-					case 10:
-						stack.pop();
+					stack.pop(); // Удаляет свою команду на save-all-items-on-current-step из стека, т.к. больше она не нужна
+					stack.pop(); // Удаляет свою команду спуска вниз, т.к. ему спускаться некуда (является листочком)
 
-						const index = stack[stack.length - 1];
+					stack.push({ state: 'go-line', val: null }); // Дает команду идти по текущей линии узлу сверху (родителю)
 
-						arr.push(current.arrData[index]);
+					current = current.parent;
+				break;
+				case 'go-line':
+					stack.pop(); // Удаляет команду "идти по линии"
 
-						drawLine = drawLine + `, ${current.arrData[index]}`;
-				}
+					const config = stack[stack.length - 1];
+
+					// Если по линии есть куда передвигаться, то передвигается и сохраняет значение текущего этапа
+					if (config.val + 1 < current.connections) {
+						arr.push(current.arrData[config.val]);
+
+						drawLine = drawLine + `, ${current.arrData[config.val]}`;
+
+						config.val = config.val + 1;
+
+					} else {
+						stack.pop(); // Если идти уже некуда, то удаляет команду для текущего узла на спуск и идет выше
+
+						stack.push({ state: 'go-line', val: null });
+
+						current = current.parent;
+					}
+				break;
+				default:
+					throw new Error('Unexpected error... Not found command...');
 			}
 		}
+
+		return { arr, drawLine };
+	};
+
+	sort(arraySource) {
+		if (arraySource.length === 0) {
+			return arraySource;
+		}
+
+		// Создаем стороннее дерево
+		const treeStructureData = new TreeTwoThreeFour();
+
+		// Заносим в стороннее дерево данные. Значения выстраиваются в четкой последовательности дерева 2-3-4.
+		for (let m = 0; m < arraySource.length; m++) {
+			treeStructureData.insert(arraySource[m]);
+		}
+
+		// Создаем итератор, который будет отдавать нам значения в порядке сортировки
+		const iteratorTree = this.getCenteredTraversalIterator(treeStructureData.getRoot());
+
+		let i = 0;
+
+		// Дергаем итератор и получаем данные. Записываем обратно в массив.
+		for (const value of iteratorTree) {
+			arraySource[i] = value;
+
+			i++;
+		}
+
+		return arraySource;
 	};
 };
